@@ -39,6 +39,7 @@ aggregation_map = {
     'Votação': ('Votação.raw', 'key')
 }
 def aggregate_field(index, prop_name, output_folder):
+    print("Aggregating", prop_name)
     r = client.search(index=index, size=0, aggs={
         prop_name: {
             'terms': {
