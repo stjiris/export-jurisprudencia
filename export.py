@@ -19,7 +19,7 @@ def scroll_all(index, source, initial_func, foreach_func, final_func):
     r = client.search(index=index, source=source, scroll="2m")
     i = 0
     initial_func(r)
-    while r["hits"]["total"]["value"] > 0:
+    while i < r["hits"]["total"]["value"]:
         for hit in r["hits"]["hits"]:
             foreach_func(hit, i)
             i+=1
