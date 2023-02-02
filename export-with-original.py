@@ -39,7 +39,6 @@ aggregation_map = {
     'Votação': ('Votação.raw', 'key')
 }
 def aggregate_field(index, prop_name, output_folder):
-    print("Aggregating", prop_name)
     r = client.search(index=index, size=0, aggs={
         prop_name: {
             'terms': {
@@ -47,13 +46,14 @@ def aggregate_field(index, prop_name, output_folder):
                 'size': 100000, #65536,
                 'order': {
                     '_key': "asc",
-                }
+                },
+                'missing': f'sem {prop_name}' if prop_name != 'Data' else '01/01/0001'
             }
         }
     })
-
     df = pd.DataFrame(columns=["Count","Valor Atual","Correção"], data=((h.get("doc_count"), h.get(aggregation_map[prop_name][1]), "") for h in r.get("aggregations").get(prop_name).get("buckets")))
     df.to_excel(path.join(output_folder, f"{prop_name}-aggs.xlsx"),index=False)
+    return df["Count"].sum()
 
 text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
 original_map = {
@@ -104,25 +104,35 @@ def main(indice,exclude,index_column, output_folder):
         saving_props.append(prop_name)
         source.append(prop_name)
     
+    prop_count = {}
     data_frames = {}
+    for prop_name in saving_props:
+        sizeAgg = aggregate_field(indice, prop_name, output_folder)
+        data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["ID","Original","Atual","Correção"])
+        prop_count[prop_name] = 0
+
     def prepare_pandas(first_result):
-        size = first_result["hits"]["total"]["value"]
-        for prop_name in saving_props:
-            data_frames[prop_name] = pd.DataFrame(index=np.arange(size), columns=["ID","Original","Atual","Correção"])
+        pass
     def foreach_hit(hit, index):
         for prop_name in saving_props:
             if isinstance(hit["_source"][prop_name], str):
-                data_frames[prop_name].iloc[index] = [get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],""]
+                data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],""]
+                prop_count[prop_name]+=1
             elif hit["_source"][prop_name]:
-                data_frames[prop_name].iloc[index] = [get_index_name(hit),get_original_value(hit, prop_name),"\n".join(hit["_source"][prop_name]),""]
+                originalValues = get_original_value(hit, prop_name).split("\n")
+                for i, value in enumerate(hit["_source"][prop_name]):
+                    data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),originalValues[i],value,""]
+                    prop_count[prop_name]+=1
+            else:
+                data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),get_original_value(hit, prop_name),f"sem {prop_name}",""]
+                prop_count[prop_name]+=1
+
+
     def finalize_pandas():
         for prop_name in saving_props:
             data_frames[prop_name].to_excel(path.join(output_folder, f"{prop_name}.xlsx"),index=False)
     
     scroll_all(indice, list(source), prepare_pandas, foreach_hit, finalize_pandas)
-    
-    for prop_name in saving_props:
-        aggregate_field(indice, prop_name, output_folder)
 
 
 if __name__ == "__main__":
