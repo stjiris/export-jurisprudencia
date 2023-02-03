@@ -119,9 +119,9 @@ def main(indice,exclude,index_column, output_folder):
                 data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],""]
                 prop_count[prop_name]+=1
             elif hit["_source"][prop_name]:
-                originalValues = get_original_value(hit, prop_name).split("\n")
-                for i, value in enumerate(hit["_source"][prop_name]):
-                    data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),originalValues[i],value,""]
+                originalValues = list(set(get_original_value(hit, prop_name).split("\n"))) # Remove duplicates (they don't appear in aggs)
+                for i, value in enumerate(set(hit["_source"][prop_name])):
+                    data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),originalValues[i] if i < len(originalValues) else "",value,""]
                     prop_count[prop_name]+=1
             else:
                 data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),get_original_value(hit, prop_name),f"sem {prop_name}",""]
