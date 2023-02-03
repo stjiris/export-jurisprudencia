@@ -24,7 +24,7 @@ Export with original field requires the indice to have a field "Original". And u
 
 | Count | Atual | Correção |
 |-------|-------|----------|
-| `doc_count` of aggregation of `_source.<field>[.raw|.keyword]` by terms | `key|key_as_string` of said aggregation  | Empty |
+| `doc_count` of aggregation of `_source.<field>[.raw\|.keyword]` by terms | `key\|key_as_string` of said aggregation  | Empty |
 
 
 
