@@ -59,6 +59,7 @@ def main(indice,file):
                 print(row['Atual'],"=>",row['Correção'],n)
 
 def update_uuid(indice, prop_name, uuid, old_value, new_value):
+    i=0
     must = [{"term": {"UUID": uuid}}]
     client.search(index=indice, source=[prop_name], scroll="2m", query={"bool": {"must": must}})
     while i < r["hits"]["total"]["value"]:
