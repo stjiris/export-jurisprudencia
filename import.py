@@ -60,6 +60,7 @@ def main(indice,file):
 
 def update_uuid(indice, prop_name, uuid, old_value, new_value):
     i=0
+    n=0
     must = [{"term": {"UUID": uuid}}]
     r = client.search(index=indice, source=[prop_name], scroll="2m", query={"bool": {"must": must}})
     while i < r["hits"]["total"]["value"]:
