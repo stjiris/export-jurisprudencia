@@ -33,12 +33,11 @@ aggregation_map = {
     'Decisão': ('Decisão.raw', 'key'),
     'Descritores': ('Descritores.raw', 'key'),
     'Meio Processual': ('Meio Processual.raw', 'key'),
-    'Processo': ('Processo', 'key'),
     'Relator': ('Relator.raw', 'key'),
     'Secção': ('Secção.raw', 'key'),
     'Votação': ('Votação.raw', 'key')
 }
-def aggregate_field(index, prop_name, output_folder):
+def aggregate_field(index, prop_name, excel_writer):
     r = client.search(index=index, size=0, aggs={
         prop_name: {
             'terms': {
@@ -48,12 +47,30 @@ def aggregate_field(index, prop_name, output_folder):
                     '_key': "asc",
                 },
                 'missing': f'sem {prop_name}' if prop_name != 'Data' else '01/01/0001'
+            },
+            'aggs': {
+                'Secções': {
+                    'terms': {
+                        'field': aggregation_map["Secção"][0],
+                        'size': 15       
+                    }
+                }                
             }
         }
     })
-    df = pd.DataFrame(columns=["Count","Valor Atual","Correção"], data=((h.get("doc_count"), h.get(aggregation_map[prop_name][1]), "") for h in r.get("aggregations").get(prop_name).get("buckets")))
-    df.to_excel(path.join(output_folder, f"{prop_name}-aggs.xlsx"),index=False)
-    return df["Count"].sum()
+
+    data = []
+    c = 0
+    for agg in r.get("aggregations").get(prop_name).get("buckets"):
+        # "<empty>","curr","*","<count>"
+        data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count")))
+        c+=agg.get("doc_count")
+        # "<empty>","curr","Secção 1","<count sec 1>"
+        data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
+        
+    df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
+    df.to_excel(excel_writer, prop_name, index=False)
+    return c
 
 text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
 original_map = {
@@ -61,7 +78,6 @@ original_map = {
     'Decisão': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "",
     'Descritores': lambda o: text_content(o["Descritores"]) if "Descritores" in o else "",
     'Meio Processual': lambda o: text_content(o["Meio Processual"]) if "Meio Processual" in o else "",
-    'Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else "",
     'Relator': lambda o: text_content(o["Relator"]) if "Relator" in o else "",
     'Secção': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else "",
     'Votação': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
@@ -77,15 +93,14 @@ def main(indice,exclude,index_column, output_folder):
         This tool will exports INDICE into .xlsx files under the INDICE folder for each field in the INDICE.
         Each .xlsx file has the following columns:
 
-         | ID | Original | Atual | Correção |
-
-         |----|----------|-------|----------|
+         | Correção | ID | Original | Atual | Secção |
+         |----------|----|----------|-------|--------|
     """
     if not output_folder:
         makedirs(indice, exist_ok=True)
         output_folder = indice
     properties = client.indices.get_mapping(index=indice)[indice]["mappings"]["properties"]
-    source = ["Original"]
+    source = ["Original", "Secção"]
     saving_props = []
 
     if not index_column:
@@ -106,31 +121,33 @@ def main(indice,exclude,index_column, output_folder):
     
     prop_count = {}
     data_frames = {}
-    for prop_name in saving_props:
-        sizeAgg = aggregate_field(indice, prop_name, output_folder)
-        data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["ID","Original","Atual","Correção"])
-        prop_count[prop_name] = 0
+    with pd.ExcelWriter('aggs.xlsx') as writer:
+        for prop_name in saving_props:        
+            sizeAgg = aggregate_field(indice, prop_name, writer)
+            data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["Correção","ID","Original","Atual","Secção"])
+            prop_count[prop_name] = 0
 
     def prepare_pandas(first_result):
         pass
     def foreach_hit(hit, index):
         for prop_name in saving_props:
             if isinstance(hit["_source"][prop_name], str):
-                data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],""]
+                data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],hit["_source"]["Secção"]]
                 prop_count[prop_name]+=1
             elif hit["_source"][prop_name]:
                 originalValues = list(set(get_original_value(hit, prop_name).split("\n"))) # Remove duplicates (they don't appear in aggs)
                 for i, value in enumerate(set(hit["_source"][prop_name])):
-                    data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),originalValues[i] if i < len(originalValues) else "",value,""]
+                    data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),originalValues[i] if i < len(originalValues) else "",value,hit["_source"]["Secção"]]
                     prop_count[prop_name]+=1
             else:
-                data_frames[prop_name].iloc[prop_count[prop_name]] = [get_index_name(hit),get_original_value(hit, prop_name),f"sem {prop_name}",""]
+                data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),f"sem {prop_name}",hit["_source"]["Secção"]]
                 prop_count[prop_name]+=1
 
 
     def finalize_pandas():
-        for prop_name in saving_props:
-            data_frames[prop_name].to_excel(path.join(output_folder, f"{prop_name}.xlsx"),index=False)
+        with pd.ExcelWriter('indices.xlsx') as writer:
+            for prop_name in saving_props:
+                data_frames[prop_name].to_excel(writer, prop_name, index=False)
     
     scroll_all(indice, list(source), prepare_pandas, foreach_hit, finalize_pandas)
 
