@@ -58,7 +58,7 @@ def main(indice,file):
                 n = update_all(indice, prop_name, row['Atual'],row['Correção'],row['Secção'] if row['Secção'] != '*' else None)
                 print(row['Atual'],"=>",row['Correção'],n)
 
-def update_uuid(indice: str, prop_name: str, uuid: str, old_value: str, new_value: str):
+def update_uuid(indice, prop_name, uuid, old_value, new_value):
     must = [{"term": {"UUID": uuid}}]
     client.search(index=indice, source=[prop_name], scroll="2m", query={"bool": {"must": must}})
     while i < r["hits"]["total"]["value"]:
@@ -82,7 +82,7 @@ def update_uuid(indice: str, prop_name: str, uuid: str, old_value: str, new_valu
         r = client.scroll(scroll='1m', scroll_id=r.get("_scroll_id"))
     return n
 
-def update_all(indice: str, prop_name: str, old_value: str, new_value: str, section: str | None) -> int:
+def update_all(indice, prop_name, old_value, new_value, section):
     n = 0
     must = [{"term": {aggregation_map[prop_name][0]: old_value}}]
     if section:

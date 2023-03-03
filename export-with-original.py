@@ -16,7 +16,7 @@ ELASTICSEARCH_PASS = environ.get("ELASTICSEARCH_PASS","")
 client = Elasticsearch(ELASTICSEARCH_URL, basic_auth=(ELASTICSEARCH_USER,ELASTICSEARCH_PASS))
 
 def scroll_all(index, source, initial_func, foreach_func, final_func):
-    r = client.search(index=index, source=source, scroll="2m")
+    r = client.search(index=index, source=source, scroll="2m",size=200)
     i = 0
     initial_func(r)
     while i < r["hits"]["total"]["value"]:
