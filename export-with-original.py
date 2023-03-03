@@ -4,6 +4,9 @@ from dotenv import load_dotenv, find_dotenv
 from os import makedirs, environ, path
 import lxml.html
 
+import datetime
+ptime = datetime.datetime.now().isoformat()
+
 import pandas as pd
 import numpy as np
 
@@ -121,7 +124,7 @@ def main(indice,exclude,index_column, output_folder):
     
     prop_count = {}
     data_frames = {}
-    with pd.ExcelWriter('aggs.xlsx') as writer:
+    with pd.ExcelWriter(f'{output_folder}/aggs-{ptime}.xlsx') as writer:
         for prop_name in saving_props:        
             sizeAgg = aggregate_field(indice, prop_name, writer)
             data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["Correção","ID","Original","Atual","Secção"])
@@ -145,7 +148,7 @@ def main(indice,exclude,index_column, output_folder):
 
 
     def finalize_pandas():
-        with pd.ExcelWriter('indices.xlsx') as writer:
+        with pd.ExcelWriter('{output_folder}/indices-{ptime}.xlsx') as writer:
             for prop_name in saving_props:
                 data_frames[prop_name].to_excel(writer, prop_name, index=False)
     
