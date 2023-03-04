@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar/Exportar Jurisprudencia</title>
+</head>
+<body>
+    <form method="post" enctype="multipart/form-data" action="./import">
+        <input type="file" name="file" required pattern="*.xlsx">
+        <button type="submit">Atualizar Jurisiprudencia com este ficheiro.</button>
+    </form>
+    <h2>Estado</h2>
+    <pre id="state"></pre>
+    <h2>Ficheiros Importados</h2>
+    <ul id="imported">
+
+    </ul>
+    <h2>Ficheiros Exportados</h2>
+    <ul id="exported">
+
+    </ul>
+    <script>
+        fetch("./state").then( r => r.json() ).then( json => state.textContent = JSON.stringify(json, null, "  "))
+        fetch("./files").then( r => r.json()).then( json => {
+            imported.innerHTML = json.imported.map( f => `<li><a href="./imports/${f}">${f}</a></li>`);
+            exported.innerHTML = json.exported.map( f => `<li><a href="./exports/${f}">${f}</a></li>`);
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "iris-export",
+  "version": "1.0.0",
+  "description": "Export IRIS data to several excel files.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stjiris/export-jurisprudencia.git"
+  },
+  "keywords": [],
+  "author": "Diogo Almiro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stjiris/export-jurisprudencia/issues"
+  },
+  "homepage": "https://github.com/stjiris/export-jurisprudencia#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}

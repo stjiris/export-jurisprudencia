@@ -148,7 +148,7 @@ def main(indice,exclude,index_column, output_folder):
 
 
     def finalize_pandas():
-        with pd.ExcelWriter('{output_folder}/indices-{ptime}.xlsx') as writer:
+        with pd.ExcelWriter(f'{output_folder}/indices-{ptime}.xlsx') as writer:
             for prop_name in saving_props:
                 data_frames[prop_name].to_excel(writer, prop_name, index=False)
     
