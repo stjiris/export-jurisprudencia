@@ -1,6 +1,6 @@
 const { spawn } = require("child_process");
 const express = require("express");
-const { mkdirSync, readdirSync } = require("fs");
+const { mkdirSync, readdirSync, rmSync } = require("fs");
 const multer = require("multer");
 const path = require("path")
 const app = express();
@@ -48,7 +48,15 @@ app.get("/files", (req, res) => {
 })
 
 app.post("/import", upload.single("file"), (req, res) => {
-    if( state != IDLE_STATE ) res.status(401).end("SERVER IS BUSY. SEE <a href='./state'>CURRENT STATE</a>")
+    
+    if( state != IDLE_STATE ){
+        rmSync(req.file.path)
+        return res.status(401).end("SERVER IS BUSY. SEE <a href='./state'>CURRENT STATE</a>")
+    }
+    if( req.body.code != process.env.CODE ){
+        rmSync(req.file.path)
+        return res.status(400).end("CODE IS INCORRECT");
+    }
     res.end("Running");
     state = BUSY_STATE;
     let start = new Date();
