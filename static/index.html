@@ -48,7 +48,12 @@
                 let c3 = row.insertCell();
                 c3.innerHTML = obj.indice ? `<a href="./exports/${obj.indice}">${obj.indice}</a>` : "n.d."
                 let c4 = row.insertCell();
-                c4.innerHTML = intl.format(obj.date);
+                try{
+                    c4.innerHTML = intl.format(obj.date);
+                }
+                catch(e){
+                    
+                }
                 let c5 = row.insertCell();
                 c5.innerHTML = obj.result ? `<a href="./results/${obj.result}">${obj.result}</a>` : "n.d."                
             }
