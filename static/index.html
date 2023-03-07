@@ -19,6 +19,7 @@
                 <th>Ficheiro Importado</th>
                 <th>Ficheiro Aggregações Exportado</th>
                 <th>Ficheiro Índices Exportado</th>
+                <th>Data</th>
             </tr>
         </thead>
         <tbody id="files"></tbody>
@@ -26,18 +27,26 @@
     <script>
         fetch("./state").then( r => r.json() ).then( json => state.textContent = json.state)
         fetch("./files").then( r => r.json()).then( json => {
-            let imported = json.imported;
-            let aggs = json.exported.filter(f => f.indexOf("aggs") != -1);
-            let indices = json.exported.filter(f => f.indexOf("indices") != -1)
+            let filenames = json.imported.map( o => o.replace(".xlsx","")).map( f => ({
+                date: new Date(parseInt(f)),
+                imported: json.imported.find( c => c.indexOf(f) != -1),
+                agg: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("aggs")),
+                indice: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("indice"))
+            })).sort( (a,b) => b.date - a.date);
+
             let tbody = document.getElementById("files");
-            for(let i = 0; i < Math.max(imported.length, aggs.length, indices.length); i++){
+            let intl = new Intl.DateTimeFormat("pt", {dateStyle:"medium", timeStyle:"medium"});
+            for( let obj of filenames ){
                 let row = tbody.insertRow();
+
                 let c1 = row.insertCell();
-                c1.innerHTML = imported[i] ? `<a href="./imports/${imported[i]}">${imported[i]}</a>` : "n.d."
+                c1.innerHTML = obj.imported ? `<a href="./imports/${obj.imported}">${obj.imported}</a>` : "n.d."
                 let c2 = row.insertCell();
-                c2.innerHTML = aggs[i] ? `<a href="./exports/${aggs[i]}">${aggs[i]}</a>` : "n.d."
+                c2.innerHTML = obj.agg ? `<a href="./exports/${obj.agg}">${obj.agg}</a>` : "n.d."
                 let c3 = row.insertCell();
-                c3.innerHTML = indices[i] ? `<a href="./exports/${indices[i]}">${indices[i]}</a>` : "n.d."
+                c3.innerHTML = obj.indice ? `<a href="./exports/${obj.indice}">${obj.indice}</a>` : "n.d."
+                let c4 = row.insertCell();
+                c4.innerHTML = intl.format(obj.date);
             }
         })
     </script>
