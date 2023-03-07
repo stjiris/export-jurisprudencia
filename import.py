@@ -91,6 +91,7 @@ def update_uuid(indice, prop_name, uuid, old_value, new_value):
             i+=1
 
         r = client.scroll(scroll='1m', scroll_id=r.get("_scroll_id"))
+    client.clear_scroll(scroll_id=r.get("_scroll_id"))
     return n
 
 def update_all(indice, prop_name, old_value, new_value, section):
@@ -118,6 +119,8 @@ def update_all(indice, prop_name, old_value, new_value, section):
             i+=1
 
         r = client.scroll(scroll='1m', scroll_id=r.get("_scroll_id"))
+    
+    client.clear_scroll(scroll_id=r.get("_scroll_id"))
     return n
 
 
