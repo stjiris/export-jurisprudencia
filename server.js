@@ -75,7 +75,7 @@ app.post("/import", upload.single("file"), (req, res) => {
         lastResult.importStdout = importProcStdout
         lastResult.importEnd = new Date()
         lastResult.exportStart = new Date()
-        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.8.0","-e","UUID","-e","CONTENT","-e","Sumário","-e","Texto","-e","URL","-e","Tipo","-e","Processo","-i","UUID","-o","static/exports/","-n",filename]);
+        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.8.0","-e","UUID","-e","CONTENT","-e","Sumário","-e","Texto","-e","URL","-e","Processo","-i","UUID","-o","static/exports/","-n",filename]);
         let exportProcStdout = "";
         let exportProcStderr = "";
         exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
