@@ -20,6 +20,7 @@
                 <th>Ficheiro Aggregações Exportado</th>
                 <th>Ficheiro Índices Exportado</th>
                 <th>Data</th>
+                <th>Detalhes Processo</th>
             </tr>
         </thead>
         <tbody id="files"></tbody>
@@ -49,7 +50,7 @@
                 let c4 = row.insertCell();
                 c4.innerHTML = intl.format(obj.date);
                 let c5 = row.insertCell();
-                c5.innerHTML = obj.result ? `<a href="./exports/${obj.result}">${obj.result}</a>` : "n.d."                
+                c5.innerHTML = obj.result ? `<a href="./results/${obj.result}">${obj.result}</a>` : "n.d."                
             }
         })
     </script>
