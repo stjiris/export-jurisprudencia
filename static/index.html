@@ -52,7 +52,7 @@
                     c4.innerHTML = intl.format(obj.date);
                 }
                 catch(e){
-                    
+                    c4.innerHTML = "n.d.";
                 }
                 let c5 = row.insertCell();
                 c5.innerHTML = obj.result ? `<a href="./results/${obj.result}">${obj.result}</a>` : "n.d."                
