@@ -30,8 +30,9 @@
             let filenames = json.imported.map( o => o.replace(".xlsx","")).map( f => ({
                 date: new Date(parseInt(f)),
                 imported: json.imported.find( c => c.indexOf(f) != -1),
-                agg: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("aggs")),
-                indice: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("indice"))
+                agg: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("aggs") != -1),
+                indice: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("indice") != -1),
+                result: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("result") != -1),
             })).sort( (a,b) => b.date - a.date);
 
             let tbody = document.getElementById("files");
@@ -47,6 +48,8 @@
                 c3.innerHTML = obj.indice ? `<a href="./exports/${obj.indice}">${obj.indice}</a>` : "n.d."
                 let c4 = row.insertCell();
                 c4.innerHTML = intl.format(obj.date);
+                let c5 = row.insertCell();
+                c5.innerHTML = obj.result ? `<a href="./exports/${obj.result}">${obj.result}</a>` : "n.d."                
             }
         })
     </script>

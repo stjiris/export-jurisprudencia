@@ -1,12 +1,13 @@
 const { spawn } = require("child_process");
 const express = require("express");
-const { mkdirSync, readdirSync, rmSync } = require("fs");
+const { mkdirSync, readdirSync, rmSync, writeFileSync } = require("fs");
 const multer = require("multer");
 const path = require("path")
 const app = express();
 
 mkdirSync("static/imports/", {recursive: true})
 mkdirSync("static/exports/", {recursive: true})
+mkdirSync("static/results/", {recursive: true})
 
 const IDLE_STATE = "IDLE";
 const BUSY_STATE = "BUSY";
@@ -86,6 +87,7 @@ app.post("/import", upload.single("file"), (req, res) => {
             lastResult.exportStdout = exportProcStderr;
             lastResult.exportStderr = exportProcStdout;
             lastResult.exportEnd = new Date()
+            writeFileSync(`static/results/result-${filename}.json`, JSON.stringify(lastResult));
             state = IDLE_STATE;
         })
     })
