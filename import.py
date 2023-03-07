@@ -20,9 +20,15 @@ aggregation_map = {
     'Decisão': ('Decisão.raw', 'key'),
     'Descritores': ('Descritores.raw', 'key'),
     'Meio Processual': ('Meio Processual.raw', 'key'),
-    'Relator': ('Relator.raw', 'key'),
+    'Relator Nome Profissional': ('Relator Nome Profissional.raw', 'key'),
+    'Relator Nome Completo': ('Relator Nome Completo.raw', 'key'),
     'Secção': ('Secção.raw', 'key'),
-    'Votação': ('Votação.raw', 'key')
+    'Área': ('Área.raw', 'key'),
+    'Votação Decisão': ('Votação Decisão.raw', 'key'),
+    'Votação Vencidos': ('Votação Vencidos.raw', 'key'),
+    'Votação Declarações': ('Votação Declarações.raw', 'key'),
+    'Fonte': ('Fonte','key'),
+    'Tipo': ('Tipo','key')
 }
 
 @click.command()
@@ -36,13 +42,13 @@ def main(indice,file):
          | Correção | ID | Original | Atual | Secção |
          |----------|----|----------|-------|--------|
     """
-    props = ['Data','Decisão','Descritores','Meio Processual','Relator','Secção','Votação']
+    known_props = list(aggregation_map.keys())
     xls = pd.ExcelFile(file)
-    if not all(p in xls.sheet_names for p in props):
-        print("Expected excel to have all the following sheets:", ", ".join(props))
-        exit(1)
-
+    props = list(p for p in xls.sheet_names if p in known_props)
+    print("checking for updates on the following props", props)
+    
     for prop_name in props:
+        print(prop_name)
         df = pd.read_excel(xls, prop_name, keep_default_na=False)
         if not ('Correção' in df.columns and 'Atual' in df.columns and 'Secção' in df.columns):
             print("Expected excel to have all the folloing columns: Correção, Atual e Secção")

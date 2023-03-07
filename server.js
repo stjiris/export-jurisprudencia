@@ -53,16 +53,17 @@ app.post("/import", upload.single("file"), (req, res) => {
     
     if( state != IDLE_STATE ){
         rmSync(req.file.path)
-        return res.status(401).end("SERVER IS BUSY. SEE <a href='./state'>CURRENT STATE</a>")
+        return res.status(401).end("SERVER IS BUSY. SEE <a href='./state.html'>CURRENT STATE</a>")
     }
     if( req.body.code != process.env.CODE ){
         rmSync(req.file.path)
         return res.status(400).end("CODE IS INCORRECT");
     }
+    let filename = path.basename(req.file.path,".xlsx")
     res.end("Running");
     state = BUSY_STATE;
     lastResult.importStart = new Date()
-    let importProc = spawn("env/bin/python",["import.py","jurisprudencia.7.0","-f",req.file.path]);
+    let importProc = spawn("env/bin/python",["import.py","jurisprudencia.8.0","-f",req.file.path]);
     let importProcStdout = "";
     let importProcStderr = "";
     importProc.stdout.on("data",data => importProcStdout+=data.toString())
@@ -74,7 +75,7 @@ app.post("/import", upload.single("file"), (req, res) => {
         lastResult.importStdout = importProcStdout
         lastResult.importEnd = new Date()
         lastResult.exportStart = new Date()
-        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.7.0","-e","UUID","-e","CONTENT","-e","Sumário","-e","Texto","-e","URL","-e","Tipo","-e","Processo","-i","UUID","-o","static/exports/"]);
+        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.8.0","-e","UUID","-e","CONTENT","-e","Sumário","-e","Texto","-e","URL","-e","Tipo","-e","Processo","-i","UUID","-o","static/exports/","-n",filename]);
         let exportProcStdout = "";
         let exportProcStderr = "";
         exportProc.stdout.on("data",data => exportProcStdout+=data.toString())

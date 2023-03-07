@@ -4,9 +4,6 @@ from dotenv import load_dotenv, find_dotenv
 from os import makedirs, environ, path
 import lxml.html
 
-import datetime
-ptime = datetime.datetime.now().isoformat()
-
 import pandas as pd
 import numpy as np
 
@@ -36,9 +33,15 @@ aggregation_map = {
     'Decisão': ('Decisão.raw', 'key'),
     'Descritores': ('Descritores.raw', 'key'),
     'Meio Processual': ('Meio Processual.raw', 'key'),
-    'Relator': ('Relator.raw', 'key'),
+    'Relator Nome Profissional': ('Relator Nome Profissional.raw', 'key'),
+    'Relator Nome Completo': ('Relator Nome Completo.raw', 'key'),
     'Secção': ('Secção.raw', 'key'),
-    'Votação': ('Votação.raw', 'key')
+    'Área': ('Área.raw', 'key'),
+    'Votação Decisão': ('Votação Decisão.raw', 'key'),
+    'Votação Vencidos': ('Votação Vencidos.raw', 'key'),
+    'Votação Declarações': ('Votação Declarações.raw', 'key'),
+    'Fonte': ('Fonte','key'),
+    'Tipo': ('Tipo','key')
 }
 def aggregate_field(index, prop_name, excel_writer):
     r = client.search(index=index, size=0, aggs={
@@ -81,9 +84,16 @@ original_map = {
     'Decisão': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "",
     'Descritores': lambda o: text_content(o["Descritores"]) if "Descritores" in o else "",
     'Meio Processual': lambda o: text_content(o["Meio Processual"]) if "Meio Processual" in o else "",
-    'Relator': lambda o: text_content(o["Relator"]) if "Relator" in o else "",
+    'Relator Nome Profissional': lambda o: text_content(o["Relator"]) if "Relator" in o else "",
+    'Relator Nome Completo': lambda o: text_content(o["Relator"]) if "Relator" in o else "",
     'Secção': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else "",
-    'Votação': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
+    'Área': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else "",
+    'Votação Decisão': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
+    'Votação Vencidos': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
+    'Votação Declarações': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
+    'Fonte': lambda o: "",
+    'Tipo': lambda o: ""
+
 }
 
 @click.command()
@@ -91,7 +101,8 @@ original_map = {
 @click.option("-e","--exclude",multiple=True, help="Fields to ignore. Fields that are not text, keyword or date are already ignored.")
 @click.option("-i","--index-column",required=False, help="Overwrites field to use as an ID. This value must be a key of _source")
 @click.option("-o","--output-folder",required=False,type=click.Path(file_okay=False,dir_okay=True,exists=True,resolve_path=True), help="Overwrites output folder")
-def main(indice,exclude,index_column, output_folder):
+@click.option("-n","--name", required=True, help="Filename suffix")
+def main(indice,exclude,index_column, output_folder, name):
     """
         This tool will exports INDICE into .xlsx files under the INDICE folder for each field in the INDICE.
         Each .xlsx file has the following columns:
@@ -124,7 +135,7 @@ def main(indice,exclude,index_column, output_folder):
     
     prop_count = {}
     data_frames = {}
-    with pd.ExcelWriter(f'{output_folder}/aggs-{ptime}.xlsx') as writer:
+    with pd.ExcelWriter(f'{output_folder}/aggs-{name}.xlsx') as writer:
         for prop_name in saving_props:        
             sizeAgg = aggregate_field(indice, prop_name, writer)
             data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["Correção","ID","Original","Atual","Secção"])
@@ -148,7 +159,7 @@ def main(indice,exclude,index_column, output_folder):
 
 
     def finalize_pandas():
-        with pd.ExcelWriter(f'{output_folder}/indices-{ptime}.xlsx') as writer:
+        with pd.ExcelWriter(f'{output_folder}/indices-{name}.xlsx') as writer:
             for prop_name in saving_props:
                 data_frames[prop_name].to_excel(writer, prop_name, index=False)
     
