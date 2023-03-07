@@ -101,7 +101,8 @@ original_map = {
 @click.option("-i","--index-column",required=False, help="Overwrites field to use as an ID. This value must be a key of _source")
 @click.option("-o","--output-folder",required=False,type=click.Path(file_okay=False,dir_okay=True,exists=True,resolve_path=True), help="Overwrites output folder")
 @click.option("-n","--name", required=True, help="Filename suffix")
-def main(indice,exclude,index_column, output_folder, name):
+@click.option("-a","--all","create_indices", help="Create indices-<name>.xlsx", is_flag=True)
+def main(indice,exclude,index_column, output_folder, name, create_indices):
     """
         This tool will exports INDICE into .xlsx files under the INDICE folder for each field in the INDICE.
         Each .xlsx file has the following columns:
@@ -161,8 +162,8 @@ def main(indice,exclude,index_column, output_folder, name):
         with pd.ExcelWriter(f'{output_folder}/indices-{name}.xlsx') as writer:
             for prop_name in saving_props:
                 data_frames[prop_name].to_excel(writer, prop_name, index=False)
-    
-    scroll_all(indice, list(source), prepare_pandas, foreach_hit, finalize_pandas)
+    if create_indices:
+        scroll_all(indice, list(source), prepare_pandas, foreach_hit, finalize_pandas)
 
 
 if __name__ == "__main__":

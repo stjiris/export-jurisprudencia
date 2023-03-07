@@ -50,8 +50,40 @@ app.get("/files", (req, res) => {
     })
 })
 
+app.post("/export", upload.none(), (req, res) => {
+    if( state != IDLE_STATE ){
+        return res.status(401).end("SERVER IS BUSY. SEE <a href='./state.html'>CURRENT STATE</a>")
+    }
+    if( req.body.code != process.env.CODE ){
+        return res.status(400).end("CODE IS INCORRECT");
+    }
+    state = BUSY_STATE;
+    res.end("Running");
+    let filename = Date.now();
+    writeFileSync(`static/imports/${filename}.txt`, `Pedido de exportação evefetuado em ${new Date(filename)}`)
+    lastResult.importStart = new Date(),
+    lastResult.importExitCode = 0,
+    lastResult.importStdout = "",
+    lastResult.importStderr = "",
+    lastResult.importEnd = new Date(),
+    lastResult.exportStart = new Date()
+    let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.8.0","-e","UUID","-e","CONTENT","-e","Sumário","-e","Texto","-e","URL","-e","Processo","-i","UUID","-o","static/exports/","-n",filename,"-a"]);
+    let exportProcStdout = "";
+    let exportProcStderr = "";
+    exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
+    exportProc.stderr.on("data",data => exportProcStderr+=data.toString())
+    exportProc.on("error", () => {})
+    exportProc.on("close", () => {
+        lastResult.exportExitCode = exportProc.exitCode;
+        lastResult.exportStdout = exportProcStderr;
+        lastResult.exportStderr = exportProcStdout;
+        lastResult.exportEnd = new Date()
+        writeFileSync(`static/results/result-${filename}.json`, JSON.stringify(lastResult));
+        state = IDLE_STATE;
+    })
+})
+
 app.post("/import", upload.single("file"), (req, res) => {
-    
     if( state != IDLE_STATE ){
         rmSync(req.file.path)
         return res.status(401).end("SERVER IS BUSY. SEE <a href='./state.html'>CURRENT STATE</a>")
@@ -81,7 +113,7 @@ app.post("/import", upload.single("file"), (req, res) => {
         let exportProcStderr = "";
         exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
         exportProc.stderr.on("data",data => exportProcStderr+=data.toString())
-        importProc.on("error", () => {})
+        exportProc.on("error", () => {})
         exportProc.on("close", () => {
             lastResult.exportExitCode = exportProc.exitCode;
             lastResult.exportStdout = exportProcStderr;

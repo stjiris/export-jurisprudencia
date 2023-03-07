@@ -7,11 +7,26 @@
     <title>Importar/Exportar Jurisprudencia</title>
 </head>
 <body>
-    <form method="post" enctype="multipart/form-data" action="./import">
-        <input type="file" name="file" required pattern="*.xlsx">
-        <input type="text" name="code" required>
-        <button type="submit">Atualizar Jurisiprudencia com este ficheiro.</button>
-    </form>
+    <table>
+        <thead><tr><th>Importar</th><th>Exportar</th></tr></thead>
+        <tbody>
+            <tr>
+                <td>
+                    <form method="post" enctype="multipart/form-data" action="./import">
+                        <input type="file" name="file" required pattern="*.xlsx">
+                        <input type="text" name="code" required>
+                        <button type="submit">Atualizar Jurisiprudencia com este ficheiro.</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" enctype="multipart/form-data" action="./export">
+                        <input type="text" name="code" required>
+                        <button type="submit">Exportar indices atuais.</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     <p>Estado: <b id="state"></b> <a href="state.html">Ver detalhes</a></p>
     <table border="1">
         <thead>
@@ -28,7 +43,7 @@
     <script>
         fetch("./state").then( r => r.json() ).then( json => state.textContent = json.state)
         fetch("./files").then( r => r.json()).then( json => {
-            let filenames = json.imported.map( o => o.replace(".xlsx","")).map( f => ({
+            let filenames = json.imported.map( o => o.replace(".xlsx","").replace(".txt","")).map( f => ({
                 date: new Date(parseInt(f)),
                 imported: json.imported.find( c => c.indexOf(f) != -1),
                 agg: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("aggs") != -1),
@@ -42,7 +57,7 @@
                 let row = tbody.insertRow();
 
                 let c1 = row.insertCell();
-                c1.innerHTML = obj.imported ? `<a href="./imports/${obj.imported}">${obj.imported}</a>` : "n.d."
+                c1.innerHTML = obj.imported ? (obj.imported.indexOf(".txt") != -1 ? "Exportação" : `<a href="./imports/${obj.imported}">${obj.imported}</a>`) : "n.d."
                 let c2 = row.insertCell();
                 c2.innerHTML = obj.agg ? `<a href="./exports/${obj.agg}">${obj.agg}</a>` : "n.d."
                 let c3 = row.insertCell();
