@@ -69,7 +69,7 @@ def aggregate_field(index, prop_name, excel_writer):
     c = 0
     for agg in r.get("aggregations").get(prop_name).get("buckets"):
         # "<empty>","curr","*","<count>"
-        data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count")))
+        # data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
         c+=agg.get("doc_count")
         # "<empty>","curr","Secção 1","<count sec 1>"
         data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
@@ -93,7 +93,6 @@ original_map = {
     'Votação Declarações': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
     'Fonte': lambda o: "",
     'Tipo': lambda o: ""
-
 }
 
 @click.command()
