@@ -13,14 +13,16 @@ const BUSY_STATE = "BUSY";
 
 let state = IDLE_STATE;
 let lastResult = {
-    start: new Date(),
+    importStart: new Date(),
     importExitCode: 0,
     importStdout: "",
     importStderr: "",
+    importEnd: new Date(),
+    exportStart: new Date(),
     exportExitCode: 0,
     exportStdout: "",
     exportStderr: "",
-    end: new Date()
+    exportEnd: new Date()
 }
 
 var storage = multer.diskStorage({
@@ -59,7 +61,7 @@ app.post("/import", upload.single("file"), (req, res) => {
     }
     res.end("Running");
     state = BUSY_STATE;
-    let start = new Date();
+    lastResult.importStart = new Date()
     let importProc = spawn("env/bin/python",["import.py","jurisprudencia.7.0","-f",req.file.path]);
     let importProcStdout = "";
     let importProcStderr = "";
@@ -70,7 +72,8 @@ app.post("/import", upload.single("file"), (req, res) => {
         lastResult.importExitCode = importProc.exitCode
         lastResult.importStderr = importProcStderr
         lastResult.importStdout = importProcStdout
-
+        lastResult.importEnd = new Date()
+        lastResult.exportStart = new Date()
         let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.7.0","-e","UUID","-e","CONTENT","-e","Sumário","-e","Texto","-e","URL","-e","Tipo","-e","Processo","-i","UUID","-o","static/exports/"]);
         let exportProcStdout = "";
         let exportProcStderr = "";
@@ -81,7 +84,7 @@ app.post("/import", upload.single("file"), (req, res) => {
             lastResult.exportExitCode = exportProc.exitCode;
             lastResult.exportStdout = exportProcStderr;
             lastResult.exportStderr = exportProcStdout;
-            lastResult.end = new Date()
+            lastResult.exportEnd = new Date()
             state = IDLE_STATE;
         })
     })

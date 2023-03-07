@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Estado</th>
+                <td id="state"></td>
+            </tr>
+        </thead>
+        <thead><tr><th>Importação</th><td></td></tr></thead>
+        <tbody>
+            <tr>
+                <td>Inicio</td>
+                <td id="importStart"></td>
+            </tr>
+            <tr>
+                <td>Fim</td>
+                <td id="importEnd"></td>
+            </tr>
+            <tr>
+                <td>Código Saida</td>
+                <td if="importExitCode"></td>
+            </tr>
+            <tr>
+                <td>Erros</td>
+                <td><pre id="importStderr"></pre></td>
+            </tr>
+            <tr>
+                <td>Output</td>
+                <td><pre id="importStdout"></pre></td>
+            </tr>
+        </tbody>
+        <thead><tr><th>Exportação</th><td></td></tr></thead>
+        <tbody>
+            <tr>
+                <td>Inicio</td>
+                <td id="exportStart"></td>
+            </tr>
+            <tr>
+                <td>Fim</td>
+                <td id="exportEnd"></td>
+            </tr>
+            <tr>
+                <td>Código Saida</td>
+                <td if="exportExitCode"></td>
+            </tr>
+            <tr>
+                <td>Erros</td>
+                <td><pre id="exportStderr"></pre></td>
+            </tr>
+            <tr>
+                <td>Output</td>
+                <td><pre id="exportStdout"></pre></td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        fetch("./state").then( r => r.json() ).then( json => {
+            state.append(json.state);
+            Object.keys(json.lastResult).forEach( k => {
+                document.getElementById(k)?.append(json.lastResult[k]);
+            })
+        })
+    </script>
+</body>
+</html>

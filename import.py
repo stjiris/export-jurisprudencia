@@ -72,7 +72,10 @@ def update_uuid(indice, prop_name, uuid, old_value, new_value):
                 for idx, curr_old_value in enumerate(curr_value):
                     if curr_old_value == old_value:
                         curr_value[idx] = new_value
-                client.update(index=indice, id=hit["_id"], doc={prop_name: [v for v in curr_value if v != '']})
+                new_list = [v for v in curr_value if v != '']
+                if len(new_list) == 0:
+                    new_list = [f"sem {prop_name}"]
+                client.update(index=indice, id=hit["_id"], doc={prop_name: new_list})
                 n+=1
             elif isinstance(curr_value, str):
                 client.update(index=indice, id=hit["_id"], doc={prop_name: new_value if new_value != '' else f"sem {prop_name}"})
