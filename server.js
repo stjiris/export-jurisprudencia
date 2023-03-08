@@ -47,7 +47,7 @@ app.get("/files", (req, res) => {
     res.json({
         exported: readdirSync("static/exports/"),
         imported: readdirSync("static/imports/"),
-        imported: readdirSync("static/results/")
+        results: readdirSync("static/results/")
     })
 })
 
