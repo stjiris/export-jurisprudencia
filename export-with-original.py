@@ -41,41 +41,68 @@ aggregation_map = {
     'Votação Vencidos': ('Votação Vencidos.raw', 'key'),
     'Votação Declarações': ('Votação Declarações.raw', 'key'),
     'Fonte': ('Fonte','key'),
-    'Tipo': ('Tipo','key')
+    'Tipo': ('Tipo','key'),
+    'ECLI': ('ECLI','key'),
+    'Processo': ('Processo','key')
 }
 def aggregate_field(index, prop_name, excel_writer):
-    r = client.search(index=index, size=0, aggs={
-        prop_name: {
-            'terms': {
-                'field': aggregation_map[prop_name][0],
-                'size': 100000, #65536,
-                'order': {
-                    '_key': "asc",
+    c=0
+    try:
+        r = client.search(index=index, size=0, aggs={
+            prop_name: {
+                'terms': {
+                    'field': aggregation_map[prop_name][0],
+                    'size': 100000, #65536,
+                    'order': {
+                        '_key': "asc",
+                    },
+                    'missing': f'sem {prop_name}' if prop_name != 'Data' else '01/01/0001'
                 },
-                'missing': f'sem {prop_name}' if prop_name != 'Data' else '01/01/0001'
-            },
-            'aggs': {
-                'Secções': {
-                    'terms': {
-                        'field': aggregation_map["Secção"][0],
-                        'size': 15       
-                    }
-                }                
+                'aggs': {
+                    'Secções': {
+                        'terms': {
+                            'field': aggregation_map["Secção"][0],
+                            'size': 15       
+                        }
+                    }                
+                }
             }
-        }
-    })
+        })
 
-    data = []
-    c = 0
-    for agg in r.get("aggregations").get(prop_name).get("buckets"):
-        # "<empty>","curr","*","<count>"
-        # data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
-        c+=agg.get("doc_count")
-        # "<empty>","curr","Secção 1","<count sec 1>"
-        data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
-        
-    df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
-    df.to_excel(excel_writer, prop_name, index=False)
+        data = []
+        c = 0
+        for agg in r.get("aggregations").get(prop_name).get("buckets"):
+            # "<empty>","curr","*","<count>"
+            # data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
+            c+=agg.get("doc_count")
+            # "<empty>","curr","Secção 1","<count sec 1>"
+            data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
+            
+        df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
+        df.to_excel(excel_writer, prop_name, index=False)
+    except:
+        r = client.search(index=index, size=0, aggs={
+            prop_name: {
+                'terms': {
+                    'field': aggregation_map[prop_name][0],
+                    'size': 100000, #65536,
+                    'order': {
+                        '_key': "asc",
+                    },
+                    'missing': f'sem {prop_name}' if prop_name != 'Data' else '01/01/0001'
+                }
+            }
+        })
+
+        data = []
+        c = 0
+        for agg in r.get("aggregations").get(prop_name).get("buckets"):
+            # "<empty>","curr","*","<count>"
+            data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
+            c+=agg.get("doc_count")
+            
+        df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
+        df.to_excel(excel_writer, prop_name, index=False)
     return c
 
 text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
@@ -92,7 +119,9 @@ original_map = {
     'Votação Vencidos': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
     'Votação Declarações': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
     'Fonte': lambda o: "",
-    'Tipo': lambda o: ""
+    'Tipo': lambda o: "",
+    'ECLI': lambda o: "",
+    'Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else ""
 }
 
 @click.command()
