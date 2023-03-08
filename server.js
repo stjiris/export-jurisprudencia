@@ -68,7 +68,7 @@ app.post("/export", upload.none(), (req, res) => {
     lastResult.importStderr = "",
     lastResult.importEnd = new Date(),
     lastResult.exportStart = new Date()
-    let fields = req.body.field || []
+    let fields = Array.isArray(req.body.field) ? req.body.field : [req.body.field]  || []
     let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.8.0","-i","UUID","-o","static/exports/","-n",filename,"-a",...fields.flatMap(o => ["-e", o])]);
     let exportProcStdout = "";
     let exportProcStderr = "";
