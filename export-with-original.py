@@ -43,6 +43,7 @@ aggregation_map = {
     'Fonte': ('Fonte','key'),
     'Tipo': ('Tipo','key'),
     'ECLI': ('ECLI','key'),
+    'Jurisprudência': ("Jurisprudência",'key'),
     'Processo': ('Processo','key')
 }
 def aggregate_field(index, prop_name, excel_writer):
@@ -121,6 +122,7 @@ original_map = {
     'Fonte': lambda o: "",
     'Tipo': lambda o: "",
     'ECLI': lambda o: "",
+    'Jurisprudência': lambda o: "",
     'Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else ""
 }
 
