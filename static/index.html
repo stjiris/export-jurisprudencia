@@ -48,7 +48,7 @@
                 imported: json.imported.find( c => c.indexOf(f) != -1),
                 agg: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("aggs") != -1),
                 indice: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("indice") != -1),
-                result: json.exported.find( c => c.indexOf(f) != -1 && c.indexOf("result") != -1),
+                result: json.results.find( c => c.indexOf(f) != -1 && c.indexOf("result") != -1),
             })).sort( (a,b) => b.date - a.date);
 
             let tbody = document.getElementById("files");
