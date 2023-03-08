@@ -7,26 +7,92 @@
     <title>Importar/Exportar Jurisprudencia</title>
 </head>
 <body>
-    <table>
-        <thead><tr><th>Importar</th><th>Exportar</th></tr></thead>
-        <tbody>
-            <tr>
-                <td>
-                    <form method="post" enctype="multipart/form-data" action="./import">
-                        <input type="file" name="file" required pattern="*.xlsx">
-                        <input type="text" name="code" required>
-                        <button type="submit">Atualizar Jurisiprudencia com este ficheiro.</button>
-                    </form>
-                </td>
-                <td>
-                    <form method="post" enctype="multipart/form-data" action="./export">
-                        <input type="text" name="code" required>
-                        <button type="submit">Exportar indices atuais.</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <form method="post" enctype="multipart/form-data" action="./import">
+        <fieldset>
+            <legend>Importar</legend>
+            <input type="file" name="file" required pattern="*.xlsx">
+            <input type="text" name="code" required placeholder="Código">
+            <button type="submit">Atualizar Jurisiprudencia com este ficheiro.</button>
+        </fieldset>
+    </form>
+    <form method="post" enctype="multipart/form-data" action="./export">
+        <fieldset>
+            <legend>Exportar</legend>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="field" value="Data" id="Data">
+                            <label for="Data">Data</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Decisão" id="Decisão">
+                            <label for="Decisão">Decisão</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Descritores" id="Descritores">
+                            <label for="Descritores">Descritores</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Meio Processual" id="Meio Processual">
+                            <label for="Meio Processual">Meio Processual</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Votação Decisão" id="Votação Decisão">
+                            <label for="Votação Decisão">Votação Decisão</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="field" value="Relator Nome Profissional" id="Relator Nome Profissional">
+                            <label for="Relator Nome Profissional">Relator Nome Profissional</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Secção" id="Secção">
+                            <label for="Secção">Secção</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="ECLI" id="ECLI">
+                            <label for="ECLI">ECLI</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Tipo" id="Tipo">
+                            <label for="Tipo">Tipo</label>
+                        </td>
+                        <td>
+
+                            <input type="checkbox" name="field" value="Votação Declarações" id="Votação Declarações">
+                            <label for="Votação Declarações">Votação Declarações</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="field" value="Relator Nome Completo" id="Relator Nome Completo">
+                            <label for="Relator Nome Completo">Relator Nome Completo</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Área" id="Área">
+                            <label for="Área">Área</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Processo" id="Processo">
+                            <label for="Processo">Processo</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Fonte" id="Fonte">
+                            <label for="Fonte">Fonte</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="field" value="Votação Vencidos" id="Votação Vencidos">
+                            <label for="Votação Vencidos">Votação Vencidos</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <input type="text" name="code" required placeholder="Código">
+            <button type="submit">Exportar indices atuais.</button>
+        </fieldset>
+    </form>
     <p>Estado: <b id="state"></b> <a href="state.html">Ver detalhes</a></p>
     <table border="1">
         <thead>
