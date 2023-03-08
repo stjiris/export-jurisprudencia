@@ -46,7 +46,8 @@ app.get("/state", (req, res) => res.json({state, lastResult}));
 app.get("/files", (req, res) => {
     res.json({
         exported: readdirSync("static/exports/"),
-        imported: readdirSync("static/imports/")
+        imported: readdirSync("static/imports/"),
+        imported: readdirSync("static/results/")
     })
 })
 
