@@ -43,6 +43,7 @@ aggregation_map = {
     'Fonte': ('Fonte','key'),
     'Tipo': ('Tipo','key'),
     'ECLI': ('ECLI','key'),
+    'Revista Excecional': ("Revista Excecional",'key'),
     'Jurisprudência': ("Jurisprudência",'key'),
     'Processo': ('Processo','key')
 }
@@ -122,6 +123,7 @@ original_map = {
     'Fonte': lambda o: "",
     'Tipo': lambda o: "",
     'ECLI': lambda o: "",
+    'Revista Excecional': lambda o: "", 
     'Jurisprudência': lambda o: "",
     'Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else ""
 }

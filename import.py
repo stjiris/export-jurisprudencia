@@ -28,7 +28,11 @@ aggregation_map = {
     'Votação Vencidos': ('Votação Vencidos.raw', 'key'),
     'Votação Declarações': ('Votação Declarações.raw', 'key'),
     'Fonte': ('Fonte','key'),
-    'Tipo': ('Tipo','key')
+    'Tipo': ('Tipo','key'),
+    'ECLI': ('ECLI','key'),
+    'Revista Excecional': ("Revista Excecional",'key'),
+    'Jurisprudência': ("Jurisprudência",'key'),
+    'Processo': ('Processo','key')
 }
 
 @click.command()
