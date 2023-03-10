@@ -123,7 +123,7 @@ original_map = {
     'Fonte': lambda o: "",
     'Tipo': lambda o: "",
     'ECLI': lambda o: "",
-    'Revista Excecional': lambda o: "", 
+    'Formação': lambda o: "", 
     'Jurisprudência': lambda o: "",
     'Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else ""
 }
