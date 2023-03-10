@@ -43,7 +43,7 @@ aggregation_map = {
     'Fonte': ('Fonte','key'),
     'Tipo': ('Tipo','key'),
     'ECLI': ('ECLI','key'),
-    'Revista Excecional': ("Revista Excecional",'key'),
+    'Formação': ("Formação",'key'),
     'Jurisprudência': ("Jurisprudência",'key'),
     'Processo': ('Processo','key')
 }
