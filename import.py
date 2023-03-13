@@ -91,7 +91,9 @@ def update_uuid(indice, prop_name, uuid, old_value, new_value):
                 client.update(index=indice, id=hit["_id"], doc={prop_name: new_value if new_value != '' else f"sem {prop_name}"})
                 n+=1
             else:
-                raise RuntimeError("Unexpected value, it is not a string nor a list.")
+                # value was null
+                client.update(index=indice, id=hit["_id"], doc={prop_name: [new_value if new_value != '' else f"sem {prop_name}"]})
+                n+=1
             i+=1
 
         r = client.scroll(scroll='1m', scroll_id=r.get("_scroll_id"))
