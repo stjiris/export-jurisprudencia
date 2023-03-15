@@ -19,82 +19,11 @@
         <fieldset>
             <legend>Exportar</legend>
             <table>
-                <tbody>
+                <tbody id="field-table">
                     <tr>
                         <td>
-                            <input type="checkbox" checked="checked" name="field" value="Data" id="Data">
-                            <label for="Data">Data</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Decisão" id="Decisão">
-                            <label for="Decisão">Decisão</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Descritores" id="Descritores">
-                            <label for="Descritores">Descritores</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Meio Processual" id="Meio Processual">
-                            <label for="Meio Processual">Meio Processual</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Votação Decisão" id="Votação Decisão">
-                            <label for="Votação Decisão">Votação Decisão</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Relator Nome Profissional" id="Relator Nome Profissional">
-                            <label for="Relator Nome Profissional">Relator Nome Profissional</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Secção" id="Secção">
-                            <label for="Secção">Secção</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="ECLI" id="ECLI">
-                            <label for="ECLI">ECLI</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Tipo" id="Tipo">
-                            <label for="Tipo">Tipo</label>
-                        </td>
-                        <td>
-
-                            <input type="checkbox" checked="checked" name="field" value="Votação Declarações" id="Votação Declarações">
-                            <label for="Votação Declarações">Votação Declarações</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Relator Nome Completo" id="Relator Nome Completo">
-                            <label for="Relator Nome Completo">Relator Nome Completo</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Área" id="Área">
-                            <label for="Área">Área</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Processo" id="Processo">
-                            <label for="Processo">Processo</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Fonte" id="Fonte">
-                            <label for="Fonte">Fonte</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Votação Vencidos" id="Votação Vencidos">
-                            <label for="Votação Vencidos">Votação Vencidos</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Jurisprudência" id="Jurisprudência">
-                            <label for="Jurisprudência">Jurisprudência</label>
-                        </td>
-                        <td>
-                            <input type="checkbox" checked="checked" name="field" value="Formação" id="Formação">
-                            <label for="Formação">Formação</label>
+                            <input id="all" type="checkbox" onchange="changeAllCheck()">
+                            <label for="all">Todos</label>
                         </td>
                     </tr>
                 </tbody>
@@ -149,6 +78,39 @@
                 c5.innerHTML = obj.result ? `<a href="./results/${obj.result}">${obj.result}</a>` : "n.d."                
             }
         })
+        fetch('./fields').then( r => r.json() ).then( fieldList => {
+            let parent = document.getElementById("field-table");
+            let columnSize = 6;
+            let col = 0;
+            let row = parent.insertRow();
+            for(let field of fieldList){
+                let cell = row.insertCell();
+                cell.innerHTML = `
+                    <input type="checkbox" checked="checked" name="field" value="${field}" id="${field}" onchange="checkAllState()">
+                    <label for="${field}">${field}</label>
+                `;
+                col++;
+                if( col >= columnSize ){
+                    col = 0;
+                    row = parent.insertRow();
+                }
+            }
+            checkAllState()
+        })
+
+        function checkAllState(){
+            let checkbox = document.getElementById("all");
+            let checkboxes = Array.from(document.querySelectorAll("input[name=field]"));
+            checkbox.indeterminate = !checkboxes.every( c => c.checked ) && !checkboxes.every( c => !c.checked )
+            checkbox.checked = checkboxes.some( c => c.checked )
+        }
+
+        function changeAllCheck(){
+            let checkbox = document.getElementById("all");
+            Array.from(document.querySelectorAll("input[name=field]")).forEach( c => c.checked = checkbox.checked);
+        }
+
+        
     </script>
 </body>
 </html>

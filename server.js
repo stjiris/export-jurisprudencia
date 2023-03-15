@@ -1,4 +1,4 @@
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const express = require("express");
 const { mkdirSync, readdirSync, rmSync, writeFileSync } = require("fs");
 const multer = require("multer");
@@ -40,6 +40,12 @@ const upload = multer({dest: "static/imports/", storage});
 app.set("json spaces", 2)
 
 app.use(express.static("static"));
+
+app.get("/fields", (req, res) => {
+    let r = spawnSync("env/bin/python",["fields.py"]);
+    res.write(r.stdout.toString())
+    res.end()
+})
 
 app.get("/state", (req, res) => res.json({state, lastResult}));
 
