@@ -2,7 +2,8 @@ import click
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv, find_dotenv 
 from os import makedirs, environ, path
-import lxml.html
+import re
+from field_information import name_to_field_and_key as aggregation_map, name_to_original_getter as original_map
 
 import pandas as pd
 import numpy as np
@@ -28,25 +29,6 @@ def scroll_all(index, source, initial_func, foreach_func, final_func):
 
     final_func()
 
-aggregation_map = {
-    'Data' : ('Data', 'key_as_string'),
-    'Decisão': ('Decisão.raw', 'key'),
-    'Descritores': ('Descritores.raw', 'key'),
-    'Meio Processual': ('Meio Processual.raw', 'key'),
-    'Relator Nome Profissional': ('Relator Nome Profissional.raw', 'key'),
-    'Relator Nome Completo': ('Relator Nome Completo.raw', 'key'),
-    'Secção': ('Secção.raw', 'key'),
-    'Área': ('Área.raw', 'key'),
-    'Votação Decisão': ('Votação Decisão.raw', 'key'),
-    'Votação Vencidos': ('Votação Vencidos.raw', 'key'),
-    'Votação Declarações': ('Votação Declarações.raw', 'key'),
-    'Fonte': ('Fonte','key'),
-    'Tipo': ('Tipo','key'),
-    'ECLI': ('ECLI','key'),
-    'Formação': ("Formação",'key'),
-    'Jurisprudência': ("Jurisprudência",'key'),
-    'Processo': ('Processo','key')
-}
 def aggregate_field(index, prop_name, excel_writer):
     field_cardinality = client.search(index=index, size=0, aggs={
         prop_name: {
@@ -57,6 +39,7 @@ def aggregate_field(index, prop_name, excel_writer):
     }).get("aggregations").get(prop_name).get("value")
     num_parts = int(np.ceil(field_cardinality / 1000))
     c=0
+    print("Aggregate", prop_name, "in", num_parts,"partitions")
     for i in range(num_parts):
         r = client.search(index=index, size=0, aggs={
             prop_name: {
@@ -93,27 +76,6 @@ def aggregate_field(index, prop_name, excel_writer):
         df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
         df.to_excel(excel_writer, prop_name, index=False)
     return c
-
-text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
-original_map = {
-    'Data' : lambda o: o.get("Data") or o.get("Data do Acordão") or o.get("Data da Decisão Sumária") or o.get("Data da Reclamação"),
-    'Decisão': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "",
-    'Descritores': lambda o: text_content(o["Descritores"]) if "Descritores" in o else "",
-    'Meio Processual': lambda o: text_content(o["Meio Processual"]) if "Meio Processual" in o else "",
-    'Relator Nome Profissional': lambda o: text_content(o["Relator"]) if "Relator" in o else "",
-    'Relator Nome Completo': lambda o: text_content(o["Relator"]) if "Relator" in o else "",
-    'Secção': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else "",
-    'Área': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else "",
-    'Votação Decisão': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
-    'Votação Vencidos': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
-    'Votação Declarações': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
-    'Fonte': lambda o: "",
-    'Tipo': lambda o: "",
-    'ECLI': lambda o: "",
-    'Formação': lambda o: "", 
-    'Jurisprudência': lambda o: "",
-    'Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else ""
-}
 
 @click.command()
 @click.argument("indice", required=True)
@@ -167,7 +129,7 @@ def main(indice,export,index_column, output_folder, name, create_indices):
                 data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],hit["_source"]["Secção"]]
                 prop_count[prop_name]+=1
             elif hit["_source"][prop_name]:
-                originalValues = list(set(get_original_value(hit, prop_name).split("\n"))) # Remove duplicates (they don't appear in aggs)
+                originalValues = list(set(re.split("\n|;",get_original_value(hit, prop_name)))) # Remove duplicates (they don't appear in aggs)
                 for i, value in enumerate(set(hit["_source"][prop_name])):
                     data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),originalValues[i] if i < len(originalValues) else "",value,hit["_source"]["Secção"]]
                     prop_count[prop_name]+=1

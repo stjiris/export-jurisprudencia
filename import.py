@@ -2,7 +2,7 @@ import click
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv, find_dotenv 
 from os import makedirs, environ, path
-import lxml.html
+from field_information import name_to_field_and_key as aggregation_map
 
 import pandas as pd
 import numpy as np
@@ -14,26 +14,6 @@ ELASTICSEARCH_USER = environ.get("ELASTICSEARCH_USER","")
 ELASTICSEARCH_PASS = environ.get("ELASTICSEARCH_PASS","")
 
 client = Elasticsearch(ELASTICSEARCH_URL, basic_auth=(ELASTICSEARCH_USER,ELASTICSEARCH_PASS))
-
-aggregation_map = {
-    'Data' : ('Data', 'key_as_string'),
-    'Decisão': ('Decisão.raw', 'key'),
-    'Descritores': ('Descritores.raw', 'key'),
-    'Meio Processual': ('Meio Processual.raw', 'key'),
-    'Relator Nome Profissional': ('Relator Nome Profissional.raw', 'key'),
-    'Relator Nome Completo': ('Relator Nome Completo.raw', 'key'),
-    'Secção': ('Secção.raw', 'key'),
-    'Área': ('Área.raw', 'key'),
-    'Votação Decisão': ('Votação Decisão.raw', 'key'),
-    'Votação Vencidos': ('Votação Vencidos.raw', 'key'),
-    'Votação Declarações': ('Votação Declarações.raw', 'key'),
-    'Fonte': ('Fonte','key'),
-    'Tipo': ('Tipo','key'),
-    'ECLI': ('ECLI','key'),
-    'Formação': ("Formação",'key'),
-    'Jurisprudência': ("Jurisprudência",'key'),
-    'Processo': ('Processo','key')
-}
 
 @click.command()
 @click.argument("indice", required=True)
