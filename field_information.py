@@ -13,12 +13,11 @@ name_to_field_and_key = {
     'Votação - Declarações': ('Votação - Declarações.raw', 'key'),
     'Secção': ('Secção.raw', 'key'),
     'Área': ('Área.raw', 'key'),
-    'Decisão - Composta': ('Decisão - Composta.raw', 'key'),
+    'Decisão - Decomposta': ('Decisão - Decomposta.raw', 'key'),
     'Decisão - Integral': ('Decisão - Integral.raw', 'key'),
     'Tribunal de Recurso - Tribunal': ('Tribunal de Recurso - Tribunal.raw','key'),
     'Tribunal de Recurso - Processo': ('Tribunal de Recurso - Processo.raw','key'),
     'Fonte': ('Fonte','key'),
-    'Jurisprudência': ("Jurisprudência",'key'),
     'Url': ('URL','key')
 }
 

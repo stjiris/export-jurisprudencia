@@ -75,7 +75,7 @@ app.post("/export", upload.none(), (req, res) => {
     lastResult.importEnd = new Date(),
     lastResult.exportStart = new Date()
     let fields = Array.isArray(req.body.field) ? req.body.field : [req.body.field]  || []
-    let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.9.0","-i","UUID","-o","static/exports/","-n",filename,"-a",...fields.flatMap(o => ["-e", o])]);
+    let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.9.1","-i","UUID","-o","static/exports/","-n",filename,"-a",...fields.flatMap(o => ["-e", o])]);
     let exportProcStdout = "";
     let exportProcStderr = "";
     exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
@@ -104,7 +104,7 @@ app.post("/import", upload.single("file"), (req, res) => {
     res.end("Running");
     state = BUSY_STATE;
     lastResult.importStart = new Date()
-    let importProc = spawn("env/bin/python",["import.py","jurisprudencia.9.0","-f",req.file.path]);
+    let importProc = spawn("env/bin/python",["import.py","jurisprudencia.9.1","-f",req.file.path]);
     let importProcStdout = "";
     let importProcStderr = "";
     importProc.stdout.on("data",data => importProcStdout+=data.toString())
@@ -116,7 +116,7 @@ app.post("/import", upload.single("file"), (req, res) => {
         lastResult.importStdout = importProcStdout
         lastResult.importEnd = new Date()
         lastResult.exportStart = new Date()
-        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.9.0","-i","UUID","-o","static/exports/","-n",filename]);
+        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.9.1","-i","UUID","-o","static/exports/","-n",filename]);
         let exportProcStdout = "";
         let exportProcStderr = "";
         exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
