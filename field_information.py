@@ -36,11 +36,10 @@ name_to_original_getter = {
     'Votação - Declarações': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
     'Secção': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else text_content(o["Área Temática"]) if "Área Temática" in o else "" or o.get("tematica") or "",
     'Área': lambda o:  text_content(o["Nº Convencional"]) if "Nº Convencional" in o else text_content(o["Área Temática"]) if "Área Temática" in o else "" or o.get("tematica") or "",
-    'Decisão - Composta': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
+    'Decisão - Decomposta': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
     'Decisão - Integral': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
     'Tribunal de Recurso - Tribunal': lambda o: text_content(o["Tribunal Recurso"]) if "Tribunal Recurso" in o else "",
     'Tribunal de Recurso - Processo': lambda o: text_content(o["Processo no Tribunal Recurso"]) if "Processo no Tribunal Recurso" in o else "",
     'Fonte': lambda o: "",
-    'Jurisprudência': lambda o: "",
     'Url': lambda o: ""
 }
