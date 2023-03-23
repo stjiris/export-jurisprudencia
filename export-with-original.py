@@ -40,7 +40,7 @@ def aggregate_field(index, prop_name, excel_writer):
     num_parts = int(np.ceil(field_cardinality / 1000))
     c=0
     print("Aggregate", prop_name, "in", num_parts,"partitions")
-    for i in range(num_parts+1):
+    for i in range(num_parts):
         r = client.search(index=index, size=0, aggs={
             prop_name: {
                 'terms': {
@@ -59,7 +59,7 @@ def aggregate_field(index, prop_name, excel_writer):
                     'Secções': {
                         'terms': {
                             'field': aggregation_map["Secção"][0],
-                            'size': 15       
+                            'size': 15
                         }
                     }                
                 }
@@ -72,7 +72,6 @@ def aggregate_field(index, prop_name, excel_writer):
             c+=agg.get("doc_count")
             # "<empty>","curr","Secção 1","<count sec 1>"
             data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
-            
         df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
         df.to_excel(excel_writer, prop_name, index=False)
     return c
