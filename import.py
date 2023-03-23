@@ -57,16 +57,25 @@ def update_uuid(indice, prop_name, uuid, old_value, new_value):
         for hit in r["hits"]["hits"]:
             curr_value = hit["_source"][prop_name]
             if isinstance(curr_value, list):
+                using=False
                 if old_value == "":
                     curr_value.append(new_value)
+                    using=True
                 for idx, curr_old_value in enumerate(curr_value):
                     if curr_old_value == old_value:
                         curr_value[idx] = new_value
+                        using=True
                 new_list = [v for v in curr_value if v != '']
                 if len(new_list) == 0:
                     new_list = [f"sem {prop_name}"]
-                client.update(index=indice, id=hit["_id"], doc={prop_name: new_list})
-                n+=1
+                if using:
+                    client.update(index=indice, id=hit["_id"], doc={prop_name: new_list})
+                    n+=1
+                else:
+                    print(f"WARNING ON: {prop_name} {old_value} => {new_value} uuid {uuid}")
+                    print(f"            curr_value was array without {old_value}")
+                    print(f"            update ignored")
+
             elif isinstance(curr_value, str):
                 client.update(index=indice, id=hit["_id"], doc={prop_name: new_value if new_value != '' else f"sem {prop_name}"})
                 n+=1
@@ -86,7 +95,7 @@ def update_all(indice, prop_name, old_value, new_value, section):
     if section:
         must.append({"term": {aggregation_map['Secção'][0]: section}})
 
-    r = client.search(index=indice, source=[prop_name], scroll="2m", query={"bool": {"must": must}})
+    r = client.search(index=indice, source=[prop_name,"UUID"], scroll="2m", query={"bool": {"must": must}})
     i=0
     while i < r["hits"]["total"]["value"]:
         for hit in r["hits"]["hits"]:
@@ -101,7 +110,10 @@ def update_all(indice, prop_name, old_value, new_value, section):
                 client.update(index=indice, id=hit["_id"], doc={prop_name: new_value})
                 n+=1
             else:
-                client.update(index=indice, id=hit["_id"], doc={prop_name: [new_value if new_value != '' else f"sem {prop_name}"]})
+                print(f"WARNING ON: {prop_name} {old_value} => {new_value} uuid {hit['_source']['UUID']})")
+                print(f"            curr_value is {curr_value}")
+                print(f"            update ignored")
+
             i+=1
 
         r = client.scroll(scroll='1m', scroll_id=r.get("_scroll_id"))
