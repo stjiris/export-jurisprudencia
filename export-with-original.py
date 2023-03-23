@@ -40,6 +40,7 @@ def aggregate_field(index, prop_name, excel_writer):
     num_parts = int(np.ceil(field_cardinality / 1000))
     c=0
     print("Aggregate", prop_name, "in", num_parts,"partitions")
+    data = []
     for i in range(num_parts):
         r = client.search(index=index, size=0, aggs={
             prop_name: {
@@ -65,15 +66,17 @@ def aggregate_field(index, prop_name, excel_writer):
                 }
             }
         })
-        data = []
         for agg in r.get("aggregations").get(prop_name).get("buckets"):
             # "<empty>","curr","*","<count>"
             # data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
             c+=agg.get("doc_count")
             # "<empty>","curr","Secção 1","<count sec 1>"
             data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
-        df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
-        df.to_excel(excel_writer, prop_name, index=False)
+            if agg.get("doc_count") != sum(h.get("doc_count") for h in  agg.get("Secções").get("buckets") ):
+                print(r.get("aggregations").get(prop_name))
+                raise RuntimeError("ERROR")
+    df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
+    df.to_excel(excel_writer, prop_name, index=False)
     print(prop_name, "number of different values", c )
     return c
 
