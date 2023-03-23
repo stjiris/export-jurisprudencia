@@ -4,6 +4,10 @@ const { mkdirSync, readdirSync, rmSync, writeFileSync } = require("fs");
 const multer = require("multer");
 const path = require("path")
 const app = express();
+const {Client} = require('@elastic/elasticsearch');
+const client = new Client({node: process.env.ES_URL || 'http://localhost:9200'});
+
+const CURRENT_INDEX = "jurisprudencia.9.2";
 
 mkdirSync("static/imports/", {recursive: true})
 mkdirSync("static/exports/", {recursive: true})
@@ -47,6 +51,52 @@ app.get("/fields", (req, res) => {
     res.end()
 })
 
+app.get("/search", async (req, res) => {
+    let iuec = req.query.iuec;
+    if( !iuec ) return res.json(null);
+
+    let found = await client.get({
+        index: CURRENT_INDEX,
+        id: iuec
+    }).catch( e => null);
+    if( found ) return res.json(found)
+
+    
+    let r = await client.search({
+        index: CURRENT_INDEX,
+        query: {
+            term: {
+                UUID: iuec
+            }
+        }
+    })
+    if( r.hits.hits.length == 0 ){
+        r = await client.search({
+            index: CURRENT_INDEX,
+            query: {
+                term: {
+                    ECLI: iuec
+                }
+            }
+        })
+        if( r.hits.hits.length == 0 ){
+            return res.json(null);
+        }
+    }
+    return res.json(r.hits.hits[0])
+})
+
+app.post("/update", express.json(),(req, res) => {
+    if( req.body.code != process.env.CODE ){
+        return res.status(400).end("CODE IS INCORRECT");
+    }
+    client.update({
+        index: CURRENT_INDEX,
+        doc: req.body.doc,
+        id: req.body.id
+    }).then( r => res.json(r) ).catch( e => {console.log(e); res.json("Error")})
+})
+
 app.get("/state", (req, res) => res.json({state, lastResult}));
 
 app.get("/files", (req, res) => {
@@ -75,7 +125,7 @@ app.post("/export", upload.none(), (req, res) => {
     lastResult.importEnd = new Date(),
     lastResult.exportStart = new Date()
     let fields = Array.isArray(req.body.field) ? req.body.field : [req.body.field]  || []
-    let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.9.2","-i","UUID","-o","static/exports/","-n",filename,"-a",...fields.flatMap(o => ["-e", o])]);
+    let exportProc = spawn("env/bin/python",["export-with-original.py",CURRENT_INDEX,"-i","UUID","-o","static/exports/","-n",filename,"-a",...fields.flatMap(o => ["-e", o])]);
     let exportProcStdout = "";
     let exportProcStderr = "";
     exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
@@ -104,7 +154,7 @@ app.post("/import", upload.single("file"), (req, res) => {
     res.end("Running");
     state = BUSY_STATE;
     lastResult.importStart = new Date()
-    let importProc = spawn("env/bin/python",["import.py","jurisprudencia.9.2","-f",req.file.path]);
+    let importProc = spawn("env/bin/python",["import.py",CURRENT_INDEX,"-f",req.file.path]);
     let importProcStdout = "";
     let importProcStderr = "";
     importProc.stdout.on("data",data => importProcStdout+=data.toString())
@@ -116,7 +166,7 @@ app.post("/import", upload.single("file"), (req, res) => {
         lastResult.importStdout = importProcStdout
         lastResult.importEnd = new Date()
         lastResult.exportStart = new Date()
-        let exportProc = spawn("env/bin/python",["export-with-original.py","jurisprudencia.9.2","-i","UUID","-o","static/exports/","-n",filename]);
+        let exportProc = spawn("env/bin/python",["export-with-original.py",CURRENT_INDEX,"-i","UUID","-o","static/exports/","-n",filename]);
         let exportProcStdout = "";
         let exportProcStderr = "";
         exportProc.stdout.on("data",data => exportProcStdout+=data.toString())
