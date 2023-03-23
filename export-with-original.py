@@ -40,7 +40,7 @@ def aggregate_field(index, prop_name, excel_writer):
     num_parts = int(np.ceil(field_cardinality / 1000))
     c=0
     print("Aggregate", prop_name, "in", num_parts,"partitions")
-    for i in range(num_parts):
+    for i in range(num_parts+1):
         r = client.search(index=index, size=0, aggs={
             prop_name: {
                 'terms': {
