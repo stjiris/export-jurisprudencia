@@ -18,7 +18,7 @@ name_to_field_and_key = {
     'Tribunal de Recurso - Tribunal': ('Tribunal de Recurso - Tribunal.raw','key'),
     'Tribunal de Recurso - Processo': ('Tribunal de Recurso - Processo.raw','key'),
     'Fonte': ('Fonte','key'),
-    'Url': ('URL','key')
+    'URL': ('URL','key')
 }
 
 text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
@@ -41,5 +41,5 @@ name_to_original_getter = {
     'Tribunal de Recurso - Tribunal': lambda o: text_content(o["Tribunal Recurso"]) if "Tribunal Recurso" in o else "",
     'Tribunal de Recurso - Processo': lambda o: text_content(o["Processo no Tribunal Recurso"]) if "Processo no Tribunal Recurso" in o else "",
     'Fonte': lambda o: "",
-    'Url': lambda o: ""
+    'URL': lambda o: ""
 }
