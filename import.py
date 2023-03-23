@@ -101,7 +101,7 @@ def update_all(indice, prop_name, old_value, new_value, section):
                 client.update(index=indice, id=hit["_id"], doc={prop_name: new_value})
                 n+=1
             else:
-                raise RuntimeError("Unexpected value, it is not a string nor a list.")
+                client.update(index=indice, id=hit["_id"], doc={prop_name: [new_value if new_value != '' else f"sem {prop_name}"]})
             i+=1
 
         r = client.scroll(scroll='1m', scroll_id=r.get("_scroll_id"))
