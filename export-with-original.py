@@ -74,6 +74,7 @@ def aggregate_field(index, prop_name, excel_writer):
             data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
         df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
         df.to_excel(excel_writer, prop_name, index=False)
+    print(prop_name, "number of different values", c )
     return c
 
 @click.command()
