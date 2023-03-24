@@ -1,0 +1,22 @@
+<form method="post" id="search-form" action="./field-info">
+    <select name="term" id="select-terms" required value="" >
+        <option value=""></option>
+    </select>
+    <textarea name="text" id="term-text">
+    </textarea>
+    <input type="text" name="code" required placeholder="Código">
+    <button type="submit" name="action" value="update">Atualizar</button>
+</form>
+<script>
+    let selectTerms = document.getElementById("select-terms");
+    let textareaTerm = document.getElementById("term-text");
+    fetch('./fields').then( r => r.json() ).then( fieldList => {
+        fieldList.forEach(f => selectTerms.add(new Option(f,f,false,false)))
+    });
+
+    selectTerms.addEventListener("change", async (ev) => {
+        let term = ev.target.value;
+        fetch(`/field-info?term=${encodeURIComponent(term)}`).then( r => r.status == 200 ? r.text() : "").catch(e => "").then(txt => textareaTerm.value=txt)
+    })
+    
+</script>

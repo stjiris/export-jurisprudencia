@@ -51,6 +51,33 @@ app.get("/fields", (req, res) => {
     res.end()
 })
 
+app.get("/field-info", (req, res) => {
+    client.get({
+        index: "terms-info.0.0",
+        id: req.query.term
+    }).then( r => {
+        res.send(r._source.text)
+    }).catch(e => {
+        res.status(404).send()
+    })
+})
+app.post("/field-info", express.urlencoded({extended: true}), (req, res) => {
+    if( req.body.code != process.env.CODE ){
+        return res.status(400).end("CODE IS INCORRECT");
+    }
+    client.index({
+        index: "terms-info.0.0",
+        id: req.body.term,
+        document: {
+            text: req.body.text
+        }
+    }).then( r => {
+        res.send("OK")
+    }).catch(e => {
+        res.status(500).send(e.toString())
+    })
+})
+
 app.get("/search", async (req, res) => {
     let iuec = req.query.iuec;
     if( !iuec ) return res.json(null);
