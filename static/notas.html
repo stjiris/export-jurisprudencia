@@ -16,7 +16,7 @@
 
     selectTerms.addEventListener("change", async (ev) => {
         let term = ev.target.value;
-        fetch(`/field-info?term=${encodeURIComponent(term)}`).then( r => r.status == 200 ? r.text() : "").catch(e => "").then(txt => textareaTerm.value=txt)
+        fetch(`./field-info?term=${encodeURIComponent(term)}`).then( r => r.status == 200 ? r.text() : "").catch(e => "").then(txt => textareaTerm.value=txt)
     })
     
 </script>
