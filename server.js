@@ -7,7 +7,7 @@ const app = express();
 const {Client} = require('@elastic/elasticsearch');
 const client = new Client({node: process.env.ES_URL || 'http://localhost:9200'});
 
-const CURRENT_INDEX = "jurisprudencia.9.2";
+const CURRENT_INDEX = "jurisprudencia.9.3";
 
 mkdirSync("static/imports/", {recursive: true})
 mkdirSync("static/exports/", {recursive: true})
@@ -193,7 +193,7 @@ app.post("/import", upload.single("file"), (req, res) => {
         lastResult.importStdout = importProcStdout
         lastResult.importEnd = new Date()
         lastResult.exportStart = new Date()
-        let exportProc = spawn("env/bin/python",["export-with-original.py",CURRENT_INDEX,"-i","UUID","-o","static/exports/","-n",filename]);
+        let exportProc = spawn("env/bin/python",["export-with-original.py",CURRENT_INDEX,"-i","UUID","-o","static/exports/","-n",filename,"-x","Número de Processo","-x","ECLI","-x","Tribunal de Recurso - Processo"]);
         let exportProcStdout = "";
         let exportProcStderr = "";
         exportProc.stdout.on("data",data => exportProcStdout+=data.toString())

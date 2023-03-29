@@ -87,7 +87,8 @@ def aggregate_field(index, prop_name, excel_writer):
 @click.option("-o","--output-folder",required=False,type=click.Path(file_okay=False,dir_okay=True,exists=True,resolve_path=True), help="Overwrites output folder")
 @click.option("-n","--name", required=True, help="Filename suffix")
 @click.option("-a","--all","create_indices", help="Create indices-<name>.xlsx", is_flag=True)
-def main(indice,export,index_column, output_folder, name, create_indices):
+@click.option("-x","--exclude","exclude", help="Exclude", multiple=True)
+def main(indice,export,index_column, output_folder, name, create_indices,exclude):
     """
         This tool will exports INDICE into .xlsx files under the INDICE folder for each field in the INDICE.
         Each .xlsx file has the following columns:
@@ -111,7 +112,7 @@ def main(indice,export,index_column, output_folder, name, create_indices):
     get_original_value = lambda hit, prop: original_map[prop](hit["_source"]["Original"])
 
     for prop_name in properties:
-        if prop_name not in aggregation_map or (len(export) > 0  and prop_name not in export):
+        if prop_name not in aggregation_map or (len(export) > 0  and prop_name not in export) or prop_name in exclude:
             continue
         saving_props.append(prop_name)
         source.append(prop_name)

@@ -13,15 +13,31 @@ name_to_field_and_key = {
     'Votação - Declarações': ('Votação - Declarações.raw', 'key'),
     'Secção': ('Secção.raw', 'key'),
     'Área': ('Área.raw', 'key'),
-    'Decisão - Decomposta': ('Decisão - Decomposta.raw', 'key'),
-    'Decisão - Integral': ('Decisão - Integral.raw', 'key'),
-    'Tribunal de Recurso - Tribunal': ('Tribunal de Recurso - Tribunal.raw','key'),
+    'Decisão': ('Decisão.raw', 'key'),
+    'Decisão (textual)': ('Decisão (textual).raw', 'key'),
+    'Tribunal de Recurso': ('Tribunal de Recurso.raw','key'),
     'Tribunal de Recurso - Processo': ('Tribunal de Recurso - Processo.raw','key'),
+    'Área Temática': ('Área Temática.raw','key'),
+    'Referências': ('Referências.raw','key'),
+    'Referência de publicação': ('Referência de publicação.raw','key'),
     'Fonte': ('Fonte','key'),
     'URL': ('URL','key')
 }
 
 text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
+
+
+def referencias(o):
+    r = ""
+    r+= text_content("Jurisprudência Estrangeira") if "Jurisprudência Estrangeira" in o else ""
+    r+= text_content("Jurisprudência Internacional") if "Jurisprudência Internacional" in o else ""
+    r+= text_content("Doutrina")if "Doutrina" in o else ""
+    r+= text_content("Jurisprudência Nacional") if "Jurisprudência Nacional" in o else ""
+    r+= text_content("Legislação Comunitária") if "Legislação Comunitária" in o else ""
+    r+= text_content("Legislação Estrangeira") if "Legislação Estrangeira" in o else ""
+    r+= text_content("Legislação Nacional") if "Legislação Nacional" in o else ""
+    r+= text_content("Referências Internacionais") if "Referências Internacionais" in o else ""
+    return r
 
 name_to_original_getter = {
     'Número de Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else "",
@@ -36,10 +52,13 @@ name_to_original_getter = {
     'Votação - Declarações': lambda o: text_content(o["Votação"]) if "Votação" in o else "",
     'Secção': lambda o: text_content(o["Nº Convencional"]) if "Nº Convencional" in o else text_content(o["Área Temática"]) if "Área Temática" in o else "" or o.get("tematica") or "",
     'Área': lambda o:  text_content(o["Nº Convencional"]) if "Nº Convencional" in o else text_content(o["Área Temática"]) if "Área Temática" in o else "" or o.get("tematica") or "",
-    'Decisão - Decomposta': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
-    'Decisão - Integral': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
-    'Tribunal de Recurso - Tribunal': lambda o: text_content(o["Tribunal Recurso"]) if "Tribunal Recurso" in o else "",
+    'Decisão': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
+    'Decisão (textual)': lambda o: text_content(o["Decisão"]) if "Decisão" in o else "" or o.get("decisão") or "",
+    'Tribunal de Recurso': lambda o: text_content(o["Tribunal Recurso"]) if "Tribunal Recurso" in o else "",
     'Tribunal de Recurso - Processo': lambda o: text_content(o["Processo no Tribunal Recurso"]) if "Processo no Tribunal Recurso" in o else "",
+    'Área Temática': lambda o: text_content(o["Área Temática"]) if "Área Temática" in o else "",
+    'Referências': referencias,
+    'Referência de publicação': lambda o: text_content(o["Referência de publicação"]) if "Referência de publicação" in o else "",
     'Fonte': lambda o: "",
     'URL': lambda o: ""
 }
