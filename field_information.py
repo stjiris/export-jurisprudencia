@@ -29,14 +29,14 @@ text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
 
 def referencias(o):
     r = ""
-    r+= text_content("Jurisprudência Estrangeira") if "Jurisprudência Estrangeira" in o else ""
-    r+= text_content("Jurisprudência Internacional") if "Jurisprudência Internacional" in o else ""
-    r+= text_content("Doutrina")if "Doutrina" in o else ""
-    r+= text_content("Jurisprudência Nacional") if "Jurisprudência Nacional" in o else ""
-    r+= text_content("Legislação Comunitária") if "Legislação Comunitária" in o else ""
-    r+= text_content("Legislação Estrangeira") if "Legislação Estrangeira" in o else ""
-    r+= text_content("Legislação Nacional") if "Legislação Nacional" in o else ""
-    r+= text_content("Referências Internacionais") if "Referências Internacionais" in o else ""
+    r+= text_content(["Jurisprudência Estrangeira"]) if "Jurisprudência Estrangeira" in o else ""
+    r+= text_content(["Jurisprudência Internacional"]) if "Jurisprudência Internacional" in o else ""
+    r+= text_content(["Doutrina"])if "Doutrina" in o else ""
+    r+= text_content(["Jurisprudência Nacional"]) if "Jurisprudência Nacional" in o else ""
+    r+= text_content(["Legislação Comunitária"]) if "Legislação Comunitária" in o else ""
+    r+= text_content(["Legislação Estrangeira"]) if "Legislação Estrangeira" in o else ""
+    r+= text_content(["Legislação Nacional"]) if "Legislação Nacional" in o else ""
+    r+= text_content(["Referências Internacionais"]) if "Referências Internacionais" in o else ""
     return r
 
 name_to_original_getter = {
