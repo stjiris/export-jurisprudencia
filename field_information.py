@@ -58,7 +58,7 @@ name_to_original_getter = {
     'Tribunal de Recurso - Processo': lambda o: text_content(o["Processo no Tribunal Recurso"]) if "Processo no Tribunal Recurso" in o else "",
     'Área Temática': lambda o: text_content(o["Área Temática"]) if "Área Temática" in o else "",
     'Referências': referencias,
-    'Referência de publicação': lambda o: text_content(o["Referência de publicação"]) if "Referência de publicação" in o else "",
+    'Referência de publicação': lambda o: text_content(o["Referência de Publicação"]) if "Referência de Publicação" in o else "",
     'Fonte': lambda o: "",
     'URL': lambda o: ""
 }
