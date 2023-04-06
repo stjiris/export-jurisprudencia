@@ -7,7 +7,7 @@ const app = express();
 const {Client} = require('@elastic/elasticsearch');
 const client = new Client({node: process.env.ES_URL || 'http://localhost:9200'});
 
-const CURRENT_INDEX = "jurisprudencia.9.3";
+const CURRENT_INDEX = "jurisprudencia.9.4";
 
 mkdirSync("static/imports/", {recursive: true})
 mkdirSync("static/exports/", {recursive: true})
