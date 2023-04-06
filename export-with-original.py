@@ -1,7 +1,7 @@
 import click
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv, find_dotenv 
-from os import makedirs, environ, path
+from os import makedirs, environ, path, rename
 import re
 from field_information import name_to_field_and_key as aggregation_map, name_to_original_getter as original_map
 
@@ -119,11 +119,13 @@ def main(indice,export,index_column, output_folder, name, create_indices,exclude
     
     prop_count = {}
     data_frames = {}
-    with pd.ExcelWriter(f'{output_folder}/aggs-{name}.xlsx') as writer:
+    with pd.ExcelWriter(f'{output_folder}/.aggs-{name}.xlsx') as writer:
         for prop_name in saving_props:        
             sizeAgg = aggregate_field(indice, prop_name, writer)
             data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["Correção","ID","Original","Atual","Secção"])
             prop_count[prop_name] = 0
+    
+    rename(f'{output_folder}/.aggs-{name}.xlsx', f'{output_folder}/aggs-{name}.xlsx')
 
     def prepare_pandas(first_result):
         pass
@@ -143,9 +145,11 @@ def main(indice,export,index_column, output_folder, name, create_indices,exclude
 
 
     def finalize_pandas():
-        with pd.ExcelWriter(f'{output_folder}/indices-{name}.xlsx') as writer:
+        with pd.ExcelWriter(f'{output_folder}/.indices-{name}.xlsx') as writer:
             for prop_name in saving_props:
                 data_frames[prop_name].to_excel(writer, prop_name, index=False)
+        rename(f'{output_folder}/.indices-{name}.xlsx', f'{output_folder}/indices-{name}.xlsx')
+        
     if create_indices:
         scroll_all(indice, list(source), prepare_pandas, foreach_hit, finalize_pandas)
 
