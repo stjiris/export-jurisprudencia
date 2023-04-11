@@ -35,18 +35,6 @@ name_to_field_and_key = {
 text_content = lambda html: lxml.html.fromstring(html).text_content().strip()
 
 
-def referencias(o):
-    r = ""
-    r+= text_content(o["Jurisprudência Estrangeira"]) if "Jurisprudência Estrangeira" in o else ""
-    r+= text_content(o["Jurisprudência Internacional"]) if "Jurisprudência Internacional" in o else ""
-    r+= text_content(o["Doutrina"])if "Doutrina" in o else ""
-    r+= text_content(o["Jurisprudência Nacional"]) if "Jurisprudência Nacional" in o else ""
-    r+= text_content(o["Legislação Comunitária"]) if "Legislação Comunitária" in o else ""
-    r+= text_content(o["Legislação Estrangeira"]) if "Legislação Estrangeira" in o else ""
-    r+= text_content(o["Legislação Nacional"]) if "Legislação Nacional" in o else ""
-    r+= text_content(o["Referências Internacionais"]) if "Referências Internacionais" in o else ""
-    return r
-
 name_to_original_getter = {
     'Número de Processo': lambda o: text_content(o["Processo"]) if "Processo" in o else "",
     'ECLI': lambda o: o.get("ECLI") or o.get("ecli") or "",
@@ -65,7 +53,6 @@ name_to_original_getter = {
     'Tribunal de Recurso': lambda o: text_content(o["Tribunal Recurso"]) if "Tribunal Recurso" in o else "",
     'Tribunal de Recurso - Processo': lambda o: text_content(o["Processo no Tribunal Recurso"]) if "Processo no Tribunal Recurso" in o else "",
     'Área Temática': lambda o: text_content(o["Área Temática"]) if "Área Temática" in o else "",
-    'Referências': referencias,
     'Jurisprudência Estrangeira': lambda o: text_content(o["Jurisprudência Estrangeira"]) if "Jurisprudência Estrangeira" in o else "",
     'Jurisprudência Internacional': lambda o: text_content(o["Jurisprudência Internacional"]) if "Jurisprudência Internacional" in o else "",
     'Doutrina': lambda o: text_content(o["Doutrina"]) if "Doutrina" in o else "",

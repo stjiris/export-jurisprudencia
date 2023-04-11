@@ -29,7 +29,7 @@ def scroll_all(index, source, initial_func, foreach_func, final_func):
 
     final_func()
 
-def aggregate_field(index, prop_name, excel_writer):
+def aggregate_field(index, prop_name, excel_writer,group=None):
     field_cardinality = client.search(index=index, size=0, aggs={
         prop_name: {
             'cardinality': {
@@ -57,25 +57,24 @@ def aggregate_field(index, prop_name, excel_writer):
                     'missing': f'sem {prop_name}' if prop_name != 'Data' else '01/01/0001'
                 },
                 'aggs': {
-                    'Secções': {
+                    group: {
                         'terms': {
-                            'field': aggregation_map["Secção"][0],
+                            'field': aggregation_map[group][0],
                             'size': 15
                         }
-                    }                
-                }
+                    }
+                } if group else {}
             }
         })
         for agg in r.get("aggregations").get(prop_name).get("buckets"):
             # "<empty>","curr","*","<count>"
-            # data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
-            c+=agg.get("doc_count")
+            if not group:
+                data.append(("", agg.get(aggregation_map[prop_name][1]), "*", agg.get("doc_count"))) # DONT ADD *
             # "<empty>","curr","Secção 1","<count sec 1>"
-            data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get("Secções").get("buckets"))
-            if agg.get("doc_count") != sum(h.get("doc_count") for h in  agg.get("Secções").get("buckets") ):
-                print(r.get("aggregations").get(prop_name))
-                raise RuntimeError("ERROR")
-    df = pd.DataFrame(columns=["Correção","Atual","Secção","Count"], data=data)
+            else:
+                data.extend(("", agg.get(aggregation_map[prop_name][1]), h.get("key"), h.get("doc_count")) for h in agg.get(group).get("buckets"))
+            c+=agg.get("doc_count")
+    df = pd.DataFrame(columns=["Correção","Atual",group if group else "Secção","Count"], data=data)
     df.to_excel(excel_writer, prop_name, index=False)
     print(prop_name, "number of different values", c )
     return c
@@ -88,7 +87,8 @@ def aggregate_field(index, prop_name, excel_writer):
 @click.option("-n","--name", required=True, help="Filename suffix")
 @click.option("-a","--all","create_indices", help="Create indices-<name>.xlsx", is_flag=True)
 @click.option("-x","--exclude","exclude", help="Exclude", multiple=True)
-def main(indice,export,index_column, output_folder, name, create_indices,exclude):
+@click.option("-g","--group",help="Column to group by",required=False)
+def main(indice,export,index_column, output_folder, name, create_indices,exclude, group=None):
     """
         This tool will exports INDICE into .xlsx files under the INDICE folder for each field in the INDICE.
         Each .xlsx file has the following columns:
@@ -100,7 +100,7 @@ def main(indice,export,index_column, output_folder, name, create_indices,exclude
         makedirs(indice, exist_ok=True)
         output_folder = indice
     properties = client.indices.get_mapping(index=indice)[indice]["mappings"]["properties"]
-    source = ["Original", "Secção"]
+    source = ["Original", group] if group else ["Original"]
     saving_props = []
 
     if not index_column:
@@ -121,8 +121,8 @@ def main(indice,export,index_column, output_folder, name, create_indices,exclude
     data_frames = {}
     with pd.ExcelWriter(f'{output_folder}/.aggs-{name}.xlsx') as writer:
         for prop_name in saving_props:        
-            sizeAgg = aggregate_field(indice, prop_name, writer)
-            data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["Correção","ID","Original","Atual","Secção"])
+            sizeAgg = aggregate_field(indice, prop_name, writer, group)
+            data_frames[prop_name] = pd.DataFrame(index=np.arange(sizeAgg), columns=["Correção","ID","Original","Atual",group if group else ""])
             prop_count[prop_name] = 0
     
     rename(f'{output_folder}/.aggs-{name}.xlsx', f'{output_folder}/aggs-{name}.xlsx')
@@ -132,15 +132,15 @@ def main(indice,export,index_column, output_folder, name, create_indices,exclude
     def foreach_hit(hit, index):
         for prop_name in saving_props:
             if isinstance(hit["_source"][prop_name], str):
-                data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],hit["_source"]["Secção"]]
+                data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),hit["_source"][prop_name],hit["_source"][group] if group else ""]
                 prop_count[prop_name]+=1
             elif hit["_source"][prop_name]:
                 originalValues = list(set(re.split("\n|;",get_original_value(hit, prop_name)))) # Remove duplicates (they don't appear in aggs)
                 for i, value in enumerate(set(hit["_source"][prop_name])):
-                    data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),originalValues[i] if i < len(originalValues) else "",value,hit["_source"]["Secção"]]
+                    data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),originalValues[i] if i < len(originalValues) else "",value,hit["_source"][group] if group else ""]
                     prop_count[prop_name]+=1
             else:
-                data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),f"sem {prop_name}",hit["_source"]["Secção"]]
+                data_frames[prop_name].iloc[prop_count[prop_name]] = ["",get_index_name(hit),get_original_value(hit, prop_name),f"sem {prop_name}",hit["_source"][group] if group else ""]
                 prop_count[prop_name]+=1
 
 
