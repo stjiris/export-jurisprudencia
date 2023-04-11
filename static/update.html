@@ -40,6 +40,12 @@
             lbl.htmlFor = fieldName;
             lbl.textContent = `${fieldName}:`
             labelCell.appendChild(lbl)
+            let valueCell = row.insertCell();
+            valueCell.style.verticalAlign = "baseline"
+            let value = document.createElement("pre");
+            value.style.border = "1px solid grey"
+            value.textContent = Array.isArray(r._source[fieldName]) ? r._source[fieldName].join("\n") : r._source[fieldName];
+            valueCell.appendChild(value)
             let inputCell = row.insertCell();
             let input = document.createElement("input");
             input.placeholder = r._source[fieldName]
