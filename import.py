@@ -68,7 +68,7 @@ def update_value(indice, hit, prop_name, old_value, new_value):
                     using = True
         if using:
             # cleanup
-            curr_array = list( v for v in curr_array if v != "«sem valor»" or v != "")
+            curr_array = list( v for v in curr_array if v != "«sem valor»" and v != "")
             if len(curr_array) == 0:
                 curr_array = [f"«sem valor»"]
             client.update(index=indice, id=hit["_id"], doc={prop_name: curr_array})
