@@ -41,13 +41,13 @@ def main(indice,file):
             for _index, row in df.query("Correção != ''").iterrows():
                 n = update_uuid(indice, prop_name, row["ID"], row["Atual"], row["Correção"])
                 print(row["ID"], row['Atual'],"=>",row['Correção'],n)
-        
+                client.indices.refresh(index=indice)
         else: 
             for _index, row in df.query("Correção != ''").iterrows():
                 # update by agregations
                 n = update_all(indice, prop_name, row['Atual'],row['Correção'],row['Secção'] if row['Secção'] != '*' else None)
                 print(row['Atual'],"=>",row['Correção'],n)
-        client.indices.refresh(index=indice)
+                client.indices.refresh(index=indice)
 
 def update_value(indice, hit, prop_name, old_value, new_value):
     if old_value == new_value:
