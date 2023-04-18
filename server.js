@@ -161,8 +161,8 @@ app.post("/export", upload.none(), (req, res) => {
     exportProc.on("error", () => {})
     exportProc.on("close", () => {
         lastResult.exportExitCode = exportProc.exitCode;
-        lastResult.exportStdout = exportProcStderr;
-        lastResult.exportStderr = exportProcStdout;
+        lastResult.exportStdout = exportProcStdout;
+        lastResult.exportStderr = exportProcStderr;
         lastResult.exportEnd = new Date()
         writeFileSync(`static/results/result-${filename}.json`, JSON.stringify(lastResult));
         state = IDLE_STATE;

@@ -49,6 +49,8 @@ def main(indice,file):
                 print(row['Atual'],"=>",row['Correção'],n)
 
 def update_uuid(indice, prop_name, uuid, old_value, new_value):
+    if old_value == new_value: 
+        return 0
     i=0
     n=0
     must = [{"term": {"UUID": uuid}}]
@@ -90,6 +92,8 @@ def update_uuid(indice, prop_name, uuid, old_value, new_value):
     return n
 
 def update_all(indice, prop_name, old_value, new_value, section):
+    if old_value == new_value: 
+        return 0
     n = 0
     must = [{"term": {aggregation_map[prop_name][0]: old_value}}]
     if section:
